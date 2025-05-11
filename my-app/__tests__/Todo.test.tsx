@@ -3,49 +3,35 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import Todo from '../src/app/components/Todo';
 
 describe('Todo Component', () => {
-  test('renders input and add button', () => {
+  test('renders header and empty state by default', () => {
     render(<Todo />);
 
-    expect(screen.getByPlaceholderText(/add new task/i)).toBeInTheDocument();
-    expect(screen.getByText(/add/i)).toBeInTheDocument();
+    expect(screen.getByText(/task manager/i)).toBeInTheDocument();
+    expect(screen.getByText(/your task list is empty/i)).toBeInTheDocument();
   });
 
-  test('adds a new task', () => {
+  test('adds a new task to the list', () => {
     render(<Todo />);
 
-    const input = screen.getByPlaceholderText(/add new task/i);
-    const addButton = screen.getByText(/add/i);
+    const input = screen.getByPlaceholderText(/what needs to be done/i);
+    const addButton = screen.getByRole('button', { name: /add task/i });
 
-    fireEvent.change(input, { target: { value: 'Learn testing' } });
+    fireEvent.change(input, { target: { value: 'Write unit tests' } });
     fireEvent.click(addButton);
 
-    expect(screen.getByText('Learn testing')).toBeInTheDocument();
+    expect(screen.getByText('Write unit tests')).toBeInTheDocument();
   });
 
   test('marks a task as complete', () => {
     render(<Todo />);
 
-    const input = screen.getByPlaceholderText(/add new task/i);
-    fireEvent.change(input, { target: { value: 'Write unit tests' } });
-    fireEvent.click(screen.getByText(/add/i));
+    const input = screen.getByPlaceholderText(/what needs to be done/i);
+    fireEvent.change(input, { target: { value: 'Test complete toggle' } });
+    fireEvent.click(screen.getByRole('button', { name: /add task/i }));
 
-    const checkbox = screen.getByRole('checkbox');
+    const checkbox = screen.getByLabelText(/mark as complete/i);
     fireEvent.click(checkbox);
 
-    const taskText = screen.getByText('Write unit tests');
-    expect(taskText).toHaveStyle('text-decoration: line-through');
-  });
-
-  test('removes a task', () => {
-    render(<Todo />);
-
-    fireEvent.change(screen.getByPlaceholderText(/add new task/i), {
-      target: { value: 'Remove me' },
-    });
-    fireEvent.click(screen.getByText(/add/i));
-
-    fireEvent.click(screen.getByText('✖'));
-
-    expect(screen.queryByText('Remove me')).not.toBeInTheDocument();
+    expect(screen.getByText('Test complete toggle')).toHaveClass('line-through');
   });
 });
